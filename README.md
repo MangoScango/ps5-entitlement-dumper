@@ -1,7 +1,7 @@
 # ps5-entitlements-dumper
 
 Dumps add-on entitlements and their keys from `libSceNpEntitlementAccess.sprx`
-for the running game. Thanks to John for the SDK and process injecting logic.
+for the running game. Also forces ac pkgs to mount even if the game didn't ask for them.
 
 ## Build
 
@@ -9,15 +9,10 @@ for the running game. Thanks to John for the SDK and process injecting logic.
 make PS5_PAYLOAD_SDK=/path/to/sdk
 ```
 
-Defaults to `/opt/ps5-payload-sdk`. `make all` produces both ELFs.
-
 ## Run
 
-Send `entitlement-injector.elf` over socat. It finds the running game
-automatically and injects `entitlements.elf` into it:
-
 ```console
-socat -t 600 - TCP:<ps5-ip>:9021 < entitlement-injector.elf
+socat -t 600 - TCP:<ps5-ip>:9021 < entitlements.elf
 ```
 
 Output comes back on that socket and also goes to klog. Pass `--pid <n>` if

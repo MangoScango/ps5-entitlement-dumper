@@ -22,29 +22,16 @@ else
     $(error PS5_PAYLOAD_SDK is undefined)
 endif
 ELF := entitlements.elf
-INJECTOR_ELF := entitlement-injector.elf
-UPSTREAM := .agents/elfldr-upstream
 SERVICE_LABEL ?= 0
-STAGE ?= 99
-PRELOAD_IPMI ?= 1
-USE_SYSMODULE ?= 0
-CFLAGS := -Wall -Werror -g -DSERVICE_LABEL=$(SERVICE_LABEL) -DSTAGE=$(STAGE) \
-          -DPRELOAD_IPMI=$(PRELOAD_IPMI) -DUSE_SYSMODULE=$(USE_SYSMODULE)
+CFLAGS := -Wall -Werror -g -DSERVICE_LABEL=$(SERVICE_LABEL)
 LDFLAGS := -lSceSysmodule
-# $(ELF) is phony so changing a knob on the command line always rebuilds.
-.PHONY: all clean test debug injector $(ELF) $(INJECTOR_ELF)
-all: $(ELF) $(INJECTOR_ELF)
+# $(ELF) is phony so changing SERVICE_LABEL on the command line always rebuilds.
+.PHONY: all clean test test-host debug $(ELF)
+all: $(ELF)
 $(ELF): main.c
 	$(CC) $(CFLAGS) -o $@ main.c $(LDFLAGS)
-$(INJECTOR_ELF): injector.c $(ELF) $(UPSTREAM)/asset.h $(UPSTREAM)/elfldr.c \
-	$(UPSTREAM)/elfldr.h $(UPSTREAM)/log.h $(UPSTREAM)/pt.c $(UPSTREAM)/pt.h
-	$(CC) $(CFLAGS) -O1 -I$(UPSTREAM) -o $@ injector.c \
-		$(UPSTREAM)/elfldr.c $(UPSTREAM)/pt.c $(LDFLAGS)
-injector: $(INJECTOR_ELF)
 clean:
-	rm -f $(ELF) $(INJECTOR_ELF)
-test: $(ELF)
-	$(PS5_DEPLOY) -h $(PS5_HOST) -p $(PS5_PORT) $^
+	rm -f $(ELF)
 debug: $(ELF)
 	gdb-multiarch \
 	-ex "set architecture i386:x86-64" \
